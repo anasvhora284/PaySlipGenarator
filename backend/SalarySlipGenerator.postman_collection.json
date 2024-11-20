@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "Salary Slip Generator API",
+    "description": "API collection for Salary Slip Generator application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "Get All Employees",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/employees",
+            "description": "Get all employees"
+          }
+        },
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/employees",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"employeeId\": \"EMP001\",\n    \"name\": \"John Doe\",\n    \"designation\": \"Software Engineer\",\n    \"joiningDate\": \"2024-01-01\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"1234567890\"\n}"
+            },
+            "description": "Create a new employee"
+          }
+        },
+        {
+          "name": "Get Employee by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/employees/{{employee_id}}",
+            "description": "Get employee by ID"
+          }
+        },
+        {
+          "name": "Update Employee",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/employees/{{employee_id}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John Doe Updated\",\n    \"designation\": \"Senior Software Engineer\",\n    \"phone\": \"9876543210\"\n}"
+            },
+            "description": "Update employee details"
+          }
+        },
+        {
+          "name": "Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/employees/{{employee_id}}",
+            "description": "Delete employee"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Salary Slips",
+      "item": [
+        {
+          "name": "Get All Salary Slips",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/salaryslips",
+            "description": "Get all salary slips"
+          }
+        },
+        {
+          "name": "Create Salary Slip",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/salaryslips",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"employee\": \"{{employee_id}}\",\n    \"month\": 3,\n    \"year\": 2024,\n    \"earnings\": {\n        \"basic\": 30000,\n        \"da\": 3000,\n        \"hra\": 5000,\n        \"ta\": 2000\n    },\n    \"deductions\": {\n        \"providentFund\": 1800,\n        \"esi\": 500,\n        \"loan\": 0,\n        \"tax\": 2000\n    }\n}"
+            },
+            "description": "Create a new salary slip"
+          }
+        },
+        {
+          "name": "Get Salary Slip by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/salaryslips/{{salary_slip_id}}",
+            "description": "Get salary slip by ID"
+          }
+        },
+        {
+          "name": "Get Employee Salary Slips",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/salaryslips/employee/{{employee_id}}",
+            "description": "Get all salary slips for a specific employee"
+          }
+        },
+        {
+          "name": "Update Salary Slip",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/salaryslips/{{salary_slip_id}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"earnings\": {\n        \"basic\": 32000,\n        \"da\": 3200,\n        \"hra\": 5500,\n        \"ta\": 2000\n    },\n    \"deductions\": {\n        \"providentFund\": 1920,\n        \"esi\": 500,\n        \"loan\": 0,\n        \"tax\": 2200\n    }\n}"
+            },
+            "description": "Update salary slip"
+          }
+        },
+        {
+          "name": "Delete Salary Slip",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/salaryslips/{{salary_slip_id}}",
+            "description": "Delete salary slip"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "employee_id",
+      "value": "your_employee_id_here",
+      "type": "string"
+    },
+    {
+      "key": "salary_slip_id",
+      "value": "your_salary_slip_id_here",
+      "type": "string"
+    }
+  ]
+}

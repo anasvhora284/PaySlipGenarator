@@ -110,10 +110,20 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation project(':react-native-community_netinfo')
+    implementation project(':react-native-community_datetimepicker')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+}
+afterEvaluate {
+    tasks.named("packageDebugResources").configure {
+        dependsOn(":react-native-community_netinfo:generateDebugResValues")
+    }
+    tasks.named("packageReleaseResources").configure {
+        dependsOn(":react-native-community_netinfo:generateReleaseResValues")
     }
 }

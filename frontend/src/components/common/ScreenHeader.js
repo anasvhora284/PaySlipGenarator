@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text.primary,
+    color: colors.primary,
     textAlign: 'left',
     marginLeft: 20,
     zIndex: 1,

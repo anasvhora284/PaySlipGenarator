@@ -59,6 +59,13 @@ const SalarySlipForm = ({
             formData.month &&
             (parseInt(formData.month) < 1 || parseInt(formData.month) > 12)
           }
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
@@ -74,6 +81,13 @@ const SalarySlipForm = ({
             (parseInt(formData.year) < 2000 ||
               parseInt(formData.year) > new Date().getFullYear() + 1)
           }
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
       </View>
 
@@ -89,6 +103,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
@@ -98,6 +119,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
@@ -107,6 +135,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
@@ -116,6 +151,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <Text style={styles.totalText}>Total Earnings: ₹{totalEarnings}</Text>
       </View>
@@ -132,6 +174,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
@@ -141,6 +190,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
@@ -150,6 +206,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
@@ -159,6 +222,13 @@ const SalarySlipForm = ({
           keyboardType="numeric"
           left={<TextInput.Icon icon="currency-inr" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         <Text style={styles.totalText}>
           Total Deductions: ₹{totalDeductions}

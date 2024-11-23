@@ -23,6 +23,8 @@ import axios from 'axios';
 import {BASE_URL} from '../utils/api';
 import moment from 'moment';
 import {spacing, typography, layout, colors} from '../styles/common';
+import ScreenHeader from '../components/common/ScreenHeader';
+import {useFocusEffect} from '@react-navigation/native';
 
 const EmployeeDetailsScreen = ({route, navigation}) => {
   const {employeeId} = route.params || {};
@@ -47,7 +49,16 @@ const EmployeeDetailsScreen = ({route, navigation}) => {
       fetchEmployeeDetails();
       fetchEmployeeSalarySlips();
     }
-  }, [employeeId]);
+  }, [employeeId, route]);
+
+  // Refresh salary slips when the screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      if (employeeId) {
+        fetchEmployeeSalarySlips();
+      }
+    }, [employeeId]),
+  );
 
   const fetchEmployeeDetails = async () => {
     try {
@@ -200,9 +211,12 @@ const EmployeeDetailsScreen = ({route, navigation}) => {
 
   return (
     <ScrollView style={styles.container}>
+      <ScreenHeader
+        title={isNewEmployee ? 'New Employee' : 'Employee Details'}
+      />
       <View style={styles.formContainer}>
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Employee ID"
           value={formData.employeeId}
           onChangeText={text => setFormData({...formData, employeeId: text})}
@@ -210,37 +224,58 @@ const EmployeeDetailsScreen = ({route, navigation}) => {
           disabled={!isNewEmployee}
           left={<TextInput.Icon icon="card-account-details" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         {errors.employeeId && (
           <Text style={styles.errorText}>{errors.employeeId}</Text>
         )}
 
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Name"
           value={formData.name}
           onChangeText={text => setFormData({...formData, name: text})}
           error={!!errors.name}
           left={<TextInput.Icon icon="account" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Designation"
           value={formData.designation}
           onChangeText={text => setFormData({...formData, designation: text})}
           error={!!errors.designation}
           left={<TextInput.Icon icon="briefcase" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         {errors.designation && (
           <Text style={styles.errorText}>{errors.designation}</Text>
         )}
 
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Email"
           value={formData.email}
           onChangeText={text => setFormData({...formData, email: text})}
@@ -248,11 +283,18 @@ const EmployeeDetailsScreen = ({route, navigation}) => {
           keyboardType="email-address"
           left={<TextInput.Icon icon="email" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Phone"
           value={formData.phone}
           onChangeText={text => setFormData({...formData, phone: text})}
@@ -260,13 +302,20 @@ const EmployeeDetailsScreen = ({route, navigation}) => {
           keyboardType="phone-pad"
           left={<TextInput.Icon icon="phone" />}
           style={styles.input}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
         />
         {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
 
         <View style={styles.dateInputContainer}>
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>
             <TextInput
-              mode="outlined"
+              mode="flat"
               label="Joining Date"
               value={moment(formData.joiningDate).format('DD MMM YYYY')}
               editable={false}
@@ -278,6 +327,13 @@ const EmployeeDetailsScreen = ({route, navigation}) => {
                 />
               }
               style={styles.input}
+              theme={{
+                colors: {
+                  text: colors.text.primary,
+                  primary: colors.primary,
+                  underlineColor: colors.primary,
+                },
+              }}
             />
           </TouchableOpacity>
         </View>
@@ -346,8 +402,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   input: {
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
     backgroundColor: colors.surface,
+    color: colors.primary,
   },
   errorText: {
     color: colors.error,
@@ -361,7 +418,7 @@ const styles = StyleSheet.create({
   submitButton: {
     marginTop: spacing.md,
     marginBottom: spacing.lg,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primary,
   },
   divider: {
     marginVertical: spacing.md,
@@ -441,7 +498,7 @@ const styles = StyleSheet.create({
   },
   generateButton: {
     marginTop: spacing.md,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primary,
   },
   colors: {
     ...colors,

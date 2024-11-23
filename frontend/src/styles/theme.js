@@ -3,35 +3,35 @@ import {createTheme} from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
+      main: '#0D6EFD',
+      light: '#EBF3FF',
+      dark: '#0756CA',
     },
     secondary: {
-      main: '#9c27b0',
-      light: '#ba68c8',
-      dark: '#7b1fa2',
+      main: '#FFB800',
+      light: '#FFE4B5',
+      dark: '#CC9200',
     },
     error: {
-      main: '#d32f2f',
+      main: '#FF4D4F',
     },
     warning: {
       main: '#ed6c02',
     },
     success: {
-      main: '#2e7d32',
+      main: '#52C41A',
     },
     text: {
-      primary: 'rgba(0, 0, 0, 0.87)',
-      secondary: 'rgba(0, 0, 0, 0.6)',
-      disabled: 'rgba(0, 0, 0, 0.38)',
+      primary: '#333333',
+      secondary: '#666666',
+      disabled: '#999999',
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: '#EBF3FF',
+      paper: '#FFFFFF',
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 16,
   },
 });

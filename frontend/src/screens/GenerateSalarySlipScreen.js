@@ -130,7 +130,7 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
       // Process the data
       const processedData = {
         ...formData,
-        employeeId: formData.employeeId?.toString() || formData.employeeId,
+        employee: employeeId,
         month: parseInt(formData.month),
         year: parseInt(formData.year),
         earnings: Object.entries(formData.earnings).reduce(
@@ -178,8 +178,10 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
     <ScrollView style={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
-          <Title>Generate Salary Slip</Title>
-          <Subheading>{employeeName}</Subheading>
+          <Title style={{fontWeight: 600, color: colors.primary}}>
+            Generate Salary Slip
+          </Title>
+          <Subheading>for {employeeName}</Subheading>
 
           <SalarySlipForm
             formData={formData}
@@ -213,6 +215,7 @@ const styles = StyleSheet.create({
     ...layout.card,
   },
   submitButton: {
+    backgroundColor: colors.primary,
     marginTop: spacing.md,
   },
   employeeInfo: {

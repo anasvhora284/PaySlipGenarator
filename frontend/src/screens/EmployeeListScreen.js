@@ -18,6 +18,7 @@ import {colors, spacing} from '../styles/common';
 import {BASE_URL} from '../utils/api';
 import axios from 'axios';
 import {Button, IconButton} from '../components/common';
+import ScreenHeader from '../components/common/ScreenHeader';
 
 const EmployeeListScreen = ({navigation}) => {
   const [employees, setEmployees] = useState([]);
@@ -204,15 +205,13 @@ const EmployeeListScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <Searchbar
-          placeholder="Search by name or ID..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchBar}
-        />
-      </View>
-
+      <ScreenHeader title="Employees" />
+      <Searchbar
+        placeholder="Search by name or ID..."
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        style={styles.searchBar}
+      />
       <FlatList
         data={filteredEmployees}
         renderItem={renderEmployee}
@@ -236,13 +235,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  searchContainer: {
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    elevation: 4,
-  },
+
   searchBar: {
-    backgroundColor: colors.background,
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    marginVertical: 20,
+    boxShadow: '0px 1px 20px 10px #e3e3e3',
+    borderRadius: 20,
   },
   loadingContainer: {
     flex: 1,

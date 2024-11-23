@@ -7,6 +7,7 @@ import EmployeeListScreen from '../screens/EmployeeListScreen';
 import EmployeeDetailsScreen from '../screens/EmployeeDetailsScreen';
 import GenerateSalarySlipScreen from '../screens/GenerateSalarySlipScreen';
 import ViewSalarySlipScreen from '../screens/ViewSalarySlipScreen';
+import LoginScreen from '../screens/LoginScreen';
 import {colors} from '../styles/common';
 
 const Stack = createNativeStackNavigator();
@@ -15,14 +16,11 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="EmployeeList"
+        initialRouteName="Login"
         screenOptions={{
-          headerStyle: {
-            backgroundColor: colors.primary,
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: colors.background,
           },
         }}>
         <Stack.Screen
@@ -31,6 +29,9 @@ const AppNavigator = () => {
           options={{
             title: 'Employees',
             headerRight: () => null,
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
           }}
         />
 
@@ -39,6 +40,9 @@ const AppNavigator = () => {
           component={EmployeeDetailsScreen}
           options={({route}) => ({
             title: route.params?.employeeName || 'Employee Details',
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
           })}
         />
 
@@ -47,6 +51,9 @@ const AppNavigator = () => {
           component={GenerateSalarySlipScreen}
           options={{
             title: 'Generate Salary Slip',
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
           }}
         />
 
@@ -55,6 +62,20 @@ const AppNavigator = () => {
           component={ViewSalarySlipScreen}
           options={{
             title: 'Salary Slip',
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            headerShown: false,
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
           }}
         />
       </Stack.Navigator>

@@ -47,6 +47,20 @@ exports.createSalarySlip = async (req, res) => {
   try {
     const { employee, month, year, earnings, deductions } = req.body;
 
+    // Check if salary slip already exists for this employee and month/year
+    const existingSalarySlip = await SalarySlip.findOne({
+      employee,
+      month,
+      year,
+    });
+
+    if (existingSalarySlip) {
+      return res.status(400).json({
+        message:
+          "Salary slip already exists for this employee in the specified month and year",
+      });
+    }
+
     // Calculate totals
     const totalEarnings = Object.values(earnings).reduce((a, b) => a + b, 0);
     const totalDeductions = Object.values(deductions).reduce(
@@ -73,7 +87,15 @@ exports.createSalarySlip = async (req, res) => {
     await salarySlip.populate("employee", "name employeeId designation");
     res.status(201).json(salarySlip);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.code === 11000) {
+      // Handle duplicate key error
+      res.status(400).json({
+        message:
+          "Salary slip already exists for this employee in the specified month and year",
+      });
+    } else {
+      res.status(500).json({ message: error.message });
+    }
   }
 };
 
@@ -83,6 +105,23 @@ exports.updateSalarySlip = async (req, res) => {
     const salarySlip = await SalarySlip.findById(req.params.id);
     if (!salarySlip) {
       return res.status(404).json({ message: "Salary slip not found" });
+    }
+
+    // If month or year is being updated, check for existing salary slip
+    if (req.body.month || req.body.year) {
+      const existingSalarySlip = await SalarySlip.findOne({
+        employee: salarySlip.employee,
+        month: req.body.month || salarySlip.month,
+        year: req.body.year || salarySlip.year,
+        _id: { $ne: req.params.id }, // Exclude current salary slip
+      });
+
+      if (existingSalarySlip) {
+        return res.status(400).json({
+          message:
+            "Salary slip already exists for this employee in the specified month and year",
+        });
+      }
     }
 
     // If earnings or deductions are updated, recalculate totals

@@ -10,6 +10,9 @@ import {
   PermissionsAndroid,
   Linking,
   Switch,
+  TextInput,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import {Text, Button, ActivityIndicator, Card, Title} from 'react-native-paper';
 import axios from 'axios';
@@ -23,6 +26,115 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import SalarySlipForm from '../components/SalarySlipForm';
 import ScreenHeader from '../components/common/ScreenHeader';
 import zIndex from '@mui/material/styles/zIndex';
+import TouchID from 'react-native-touch-id';
+import * as Keychain from 'react-native-keychain';
+import ReactNativeBiometrics, {BiometryTypes} from 'react-native-biometrics';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+// Define AuthModal as a separate component
+const AuthModal = ({
+  passwordModalVisible,
+  setPasswordModalVisible,
+  password,
+  setPassword,
+  handlePasswordSubmit,
+  authType,
+  handleDownloadPDF,
+}) => (
+  <Modal
+    visible={passwordModalVisible}
+    transparent={true}
+    animationType="slide"
+    onRequestClose={() => setPasswordModalVisible(false)}>
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContent}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>Authentication Required</Text>
+          {authType !== 'password' && (
+            <TouchableOpacity
+              style={styles.biometricButton}
+              onPress={handleDownloadPDF}>
+              <Icon
+                name={
+                  authType === BiometryTypes.FaceID
+                    ? 'face-recognition'
+                    : 'fingerprint'
+                }
+                size={30}
+                color={colors.primary}
+                theme={{
+                  colors: {
+                    text: colors.text.primary,
+                    primary: colors.primary,
+                    underlineColor: colors.primary,
+                  },
+                }}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <Text style={styles.modalSubtitle}>
+          Enter your password to continue
+        </Text>
+
+        <TextInput
+          style={styles.passwordInput}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Enter password"
+          placeholderTextColor={colors.text.secondary}
+          autoFocus={true}
+          theme={{
+            colors: {
+              text: colors.text.primary,
+              primary: colors.primary,
+              underlineColor: colors.primary,
+            },
+          }}
+        />
+
+        <View style={styles.modalButtons}>
+          <Button
+            mode="outlined"
+            onPress={() => {
+              setPasswordModalVisible(false);
+              setPassword('');
+            }}
+            style={[styles.modalButton, styles.cancelButton]}
+            labelStyle={styles.cancelButtonText}
+            textColor={colors.text.primary}
+            theme={{
+              colors: {
+                text: colors.text.primary,
+                primary: colors.primary,
+                underlineColor: colors.primary,
+              },
+            }}>
+            Cancel
+          </Button>
+          <Button
+            mode="contained"
+            onPress={handlePasswordSubmit}
+            style={[styles.modalButton, styles.confirmButton]}
+            labelStyle={styles.confirmButtonText}
+            textColor="#fff"
+            disabled={!password}
+            theme={{
+              colors: {
+                text: '#fff',
+                primary: colors.primary,
+                underlineColor: colors.primary,
+              },
+            }}>
+            Confirm
+          </Button>
+        </View>
+      </View>
+    </View>
+  </Modal>
+);
 
 const ViewSalarySlipScreen = ({route, navigation}) => {
   const {salarySlipId} = route.params;
@@ -31,6 +143,10 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
   const [generatingPDF, setGeneratingPDF] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(null);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [password, setPassword] = useState('');
+  const [authType, setAuthType] = useState(null);
+  const rnBiometrics = new ReactNativeBiometrics();
 
   useEffect(() => {
     fetchSalarySlip();
@@ -38,6 +154,10 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
 
   useEffect(() => {
     requestStoragePermission();
+  }, []);
+
+  useEffect(() => {
+    checkBiometricSupport();
   }, []);
 
   const fetchSalarySlip = async () => {
@@ -137,6 +257,72 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
   const handleDownloadPDF = async () => {
     if (!salarySlip) return;
 
+    try {
+      if (
+        authType === BiometryTypes.Biometrics ||
+        authType === BiometryTypes.FaceID ||
+        authType === BiometryTypes.TouchID
+      ) {
+        const {success} = await rnBiometrics.simplePrompt({
+          promptMessage: 'Authenticate to download PDF',
+          cancelButtonText: 'Use Password',
+        });
+
+        if (success) {
+          await generateAndSavePDF();
+        } else {
+          // User cancelled biometric auth, show password prompt
+          setPasswordModalVisible(true);
+        }
+      } else {
+        // No biometrics available, show password prompt
+        setPasswordModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      setPasswordModalVisible(true);
+    }
+  };
+
+  const passwordPrompt = async () => {
+    if (Platform.OS === 'ios') {
+      Alert.prompt(
+        'Enter Password',
+        'Please enter the password to proceed:',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: async password => {
+              if (password === 'GenSSP@123') {
+                await generateAndSavePDF();
+              } else {
+                Alert.alert('Error', 'Incorrect password');
+              }
+            },
+          },
+        ],
+        'secure-text',
+      );
+    } else {
+      setPasswordModalVisible(true);
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (password === 'GenSSP@123') {
+      setPasswordModalVisible(false);
+      setPassword('');
+      await generateAndSavePDF();
+    } else {
+      Alert.alert('Error', 'Incorrect password');
+    }
+  };
+
+  const generateAndSavePDF = async () => {
     try {
       setGeneratingPDF(true);
 
@@ -291,6 +477,20 @@ NET SALARY: ₹${salarySlip.netSalary}
     );
   };
 
+  const checkBiometricSupport = async () => {
+    try {
+      const {available, biometryType} = await rnBiometrics.isSensorAvailable();
+      if (available) {
+        setAuthType(biometryType);
+      } else {
+        setAuthType('password');
+      }
+    } catch (error) {
+      console.log('Biometric check error:', error);
+      setAuthType('password');
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -404,6 +604,16 @@ NET SALARY: ₹${salarySlip.netSalary}
           </View>
         </View>
       )}
+
+      <AuthModal
+        passwordModalVisible={passwordModalVisible}
+        setPasswordModalVisible={setPasswordModalVisible}
+        password={password}
+        setPassword={setPassword}
+        handlePasswordSubmit={handlePasswordSubmit}
+        authType={authType}
+        handleDownloadPDF={handleDownloadPDF}
+      />
     </ScrollView>
   );
 };
@@ -473,6 +683,74 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginVertical: spacing.md,
     backgroundColor: colors.primary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: spacing.lg,
+    width: '100%',
+    maxHeight: '50%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
+  },
+  biometricButton: {
+    padding: spacing.sm,
+  },
+  passwordInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    color: colors.text.primary,
+    fontSize: 16,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
+  modalButton: {
+    flex: 1,
+    borderRadius: 8,
+  },
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderColor: colors.border,
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  confirmButton: {
+    backgroundColor: colors.primary,
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 

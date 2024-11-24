@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
   illustration: {
     width: width * 0.9,
     height: width * 0.9,
+    maxHeight: 400,
     zIndex: 1,
   },
   form: {

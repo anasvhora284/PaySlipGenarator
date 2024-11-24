@@ -22,6 +22,7 @@ import FileViewer from 'react-native-file-viewer';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import SalarySlipForm from '../components/SalarySlipForm';
 import ScreenHeader from '../components/common/ScreenHeader';
+import zIndex from '@mui/material/styles/zIndex';
 
 const ViewSalarySlipScreen = ({route, navigation}) => {
   const {salarySlipId} = route.params;
@@ -414,6 +415,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
+    color: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -431,7 +433,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    // marginBottom: spacing.md,
+    marginBottom: spacing.md,
   },
   title: {
     fontSize: 20,
@@ -440,10 +442,13 @@ const styles = StyleSheet.create({
     // marginBottom: spacing.sm,
   },
   editToggleContainer: {
+    position: 'absolute',
+    top: '100%',
+    right: '5%',
+    zIndex: 999,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'right',
     gap: spacing.sm,
-    marginLeft: 20,
   },
   editToggleText: {
     ...typography.subtitle,

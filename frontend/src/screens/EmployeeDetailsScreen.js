@@ -204,7 +204,7 @@ const EmployeeDetailsScreen = ({route, navigation}) => {
   if (loading && !isNewEmployee) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary}/>
       </View>
     );
   }
@@ -394,6 +394,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
+    color: colors.primary,
     backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',

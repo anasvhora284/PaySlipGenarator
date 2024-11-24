@@ -47,7 +47,7 @@ const SalarySlipForm = ({
     <View style={styles.container}>
       <View style={styles.column}>
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Month (1-12)"
           value={formData.month}
           onChangeText={validateMonth}
@@ -68,7 +68,7 @@ const SalarySlipForm = ({
           }}
         />
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Year (2000-present)"
           value={formData.year}
           onChangeText={validateYear}
@@ -96,7 +96,7 @@ const SalarySlipForm = ({
       <Title style={styles.sectionTitle}>Earnings</Title>
       <View style={styles.section}>
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Basic Salary"
           value={formData.earnings.basic}
           onChangeText={text => updateEarnings('basic', text)}
@@ -112,7 +112,7 @@ const SalarySlipForm = ({
           }}
         />
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="DA"
           value={formData.earnings.da}
           onChangeText={text => updateEarnings('da', text)}
@@ -128,7 +128,7 @@ const SalarySlipForm = ({
           }}
         />
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="HRA"
           value={formData.earnings.hra}
           onChangeText={text => updateEarnings('hra', text)}
@@ -144,7 +144,7 @@ const SalarySlipForm = ({
           }}
         />
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="TA"
           value={formData.earnings.ta}
           onChangeText={text => updateEarnings('ta', text)}
@@ -167,7 +167,7 @@ const SalarySlipForm = ({
       <Title style={styles.sectionTitle}>Deductions</Title>
       <View style={styles.section}>
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Provident Fund"
           value={formData.deductions.providentFund}
           onChangeText={text => updateDeductions('providentFund', text)}
@@ -183,7 +183,7 @@ const SalarySlipForm = ({
           }}
         />
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="ESI"
           value={formData.deductions.esi}
           onChangeText={text => updateDeductions('esi', text)}
@@ -199,7 +199,7 @@ const SalarySlipForm = ({
           }}
         />
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Loan"
           value={formData.deductions.loan}
           onChangeText={text => updateDeductions('loan', text)}
@@ -215,7 +215,7 @@ const SalarySlipForm = ({
           }}
         />
         <TextInput
-          mode="outlined"
+          mode="flat"
           label="Tax"
           value={formData.deductions.tax}
           onChangeText={text => updateDeductions('tax', text)}

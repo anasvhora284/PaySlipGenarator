@@ -59,7 +59,7 @@ export const layout = {
     backgroundColor: colors.surface,
     borderRadius: 8,
     elevation: 4,
-    margin: spacing.md,
-    padding: spacing.md,
+    marginHorizontal: spacing.md,
+    paddingHorizontal: spacing.md,
   },
 };

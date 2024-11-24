@@ -14,6 +14,7 @@ import {BASE_URL} from '../utils/api';
 import moment from 'moment';
 import SalarySlipForm from '../components/SalarySlipForm';
 import {colors, spacing, layout} from '../styles/common';
+import ScreenHeader from '../components/common/ScreenHeader';
 
 const GenerateSalarySlipScreen = ({route, navigation}) => {
   const {employeeId, employeeName} = route.params;
@@ -176,13 +177,17 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
 
   return (
     <ScrollView style={styles.container}>
+      <ScreenHeader title="Generate Salary Slip" style={{marginLeft: 0}} />
       <Card style={styles.card}>
         <Card.Content>
-          <Title style={{fontWeight: 600, color: colors.primary}}>
-            Generate Salary Slip
-          </Title>
-          <Subheading>for {employeeName}</Subheading>
-
+          <View style={styles.employeeInfo}>
+            <Text style={{color: colors.primary}}>
+              For{' '}
+              <Subheading style={{fontWeight: 'bold', color: colors.primary}}>
+                {employeeName}
+              </Subheading>
+            </Text>
+          </View>
           <SalarySlipForm
             formData={formData}
             setFormData={setFormData}
@@ -192,7 +197,6 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
             totalDeductions={totalDeductions}
             netSalary={netSalary}
           />
-
           <Button
             mode="contained"
             onPress={handleSubmit}
@@ -213,6 +217,7 @@ const styles = StyleSheet.create({
   },
   card: {
     ...layout.card,
+    marginVertical: 0,
   },
   submitButton: {
     backgroundColor: colors.primary,

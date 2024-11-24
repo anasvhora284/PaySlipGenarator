@@ -205,7 +205,7 @@ const EmployeeListScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Employees" />
+      <ScreenHeader title="Employees" styles={styles.HeaderText} />
       <Searchbar
         placeholder="Search by name or ID..."
         onChangeText={setSearchQuery}
@@ -235,7 +235,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-
+  HeaderText: {
+    marginLeft: 20,
+  },
   searchBar: {
     backgroundColor: '#fff',
     marginHorizontal: 20,
@@ -245,6 +247,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
+    color: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },

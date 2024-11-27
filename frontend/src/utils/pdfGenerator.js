@@ -124,7 +124,7 @@ const generateSalarySlipHTML = (salarySlip, employeeName, employeeId) => {
       </head>
       <body>
         <div class="header">
-          <div class="company-name">Your Company Name</div>
+          <div class="company-name">Saraswati School, Dahod</div>
           <div class="slip-title">Salary Slip</div>
           <div class="period">${moment(
             `${salarySlip.year}-${salarySlip.month}-01`,

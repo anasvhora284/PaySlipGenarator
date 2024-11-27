@@ -1,5 +1,6 @@
 package com.payslippro
 
+import android.os.Bundle
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -12,6 +13,12 @@ class MainActivity : ReactActivity() {
    * rendering of the component.
    */
   override fun getMainComponentName(): String = "PaySlipPro"
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    // Add delay for splash screen
+    Thread.sleep(2000) // 2000ms = 2 seconds delay
+    super.onCreate(savedInstanceState)
+  }
 
   /**
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]

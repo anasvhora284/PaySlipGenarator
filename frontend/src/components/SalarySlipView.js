@@ -9,7 +9,7 @@ const SalarySlipView = ({salarySlip}) => {
     <Card style={styles.card}>
       <Card.Content>
         <View style={styles.header}>
-          <Title style={styles.companyName}>Your Company Name</Title>
+          <Title style={styles.companyName}>Saraswati School, Dahod</Title>
           <Text style={styles.slipTitle}>Salary Slip</Text>
           <Text style={styles.period}>
             {moment(`${salarySlip.year}-${salarySlip.month}-01`).format(

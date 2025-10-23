@@ -8,6 +8,8 @@ import EmployeeDetailsScreen from '../screens/EmployeeDetailsScreen';
 import GenerateSalarySlipScreen from '../screens/GenerateSalarySlipScreen';
 import ViewSalarySlipScreen from '../screens/ViewSalarySlipScreen';
 import LoginScreen from '../screens/LoginScreen';
+import Form16UploadScreen from '../screens/Form16UploadScreen';
+import Form16DownloadScreen from '../screens/Form16DownloadScreen';
 import {colors} from '../styles/common';
 
 const Stack = createNativeStackNavigator();
@@ -73,6 +75,28 @@ const AppNavigator = () => {
           component={LoginScreen}
           options={{
             headerShown: false,
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="Form16Upload"
+          component={Form16UploadScreen}
+          options={{
+            title: 'Upload Form-16',
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="Form16Download"
+          component={Form16DownloadScreen}
+          options={{
+            title: 'Download Form-16',
             contentStyle: {
               backgroundColor: colors.background,
             },

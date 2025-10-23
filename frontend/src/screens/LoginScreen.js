@@ -1,81 +1,194 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Image,
   SafeAreaView,
   Dimensions,
   Platform,
+  Alert,
+  Keyboard,
+  Animated,
+  ScrollView,
 } from 'react-native';
-import {colors, typography, spacing} from '../styles/common';
+import {colors, spacing} from '../styles/common';
+import axios from 'axios';
+import {BASE_URL} from '../utils/api';
 
-const {width} = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 const LoginScreen = ({navigation}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (username === 'admin' && password === 'admin123') {
-      navigation.replace('EmployeeList');
-    } else {
+  const scrollViewRef = useRef(null);
+  const headerHeightAnim = useRef(new Animated.Value(height * 0.35)).current;
+  const illustrationOpacityAnim = useRef(new Animated.Value(1)).current;
+  const bottomPaddingAnim = useRef(new Animated.Value(0)).current;
+  const bottomPositionAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        Animated.parallel([
+          Animated.timing(headerHeightAnim, {
+            toValue: height * 0.12,
+            duration: 250,
+            useNativeDriver: false,
+          }),
+          Animated.timing(illustrationOpacityAnim, {
+            toValue: 0.3,
+            duration: 250,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bottomPositionAnim, {
+            toValue: height * 0.3,
+            duration: 250,
+            useNativeDriver: false,
+          }),
+        ]).start();
+      },
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        Animated.parallel([
+          Animated.timing(headerHeightAnim, {
+            toValue: height * 0.35,
+            duration: 250,
+            useNativeDriver: false,
+          }),
+          Animated.timing(illustrationOpacityAnim, {
+            toValue: 1,
+            duration: 250,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bottomPositionAnim, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: false,
+          }),
+        ]).start();
+      },
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [headerHeightAnim, illustrationOpacityAnim, bottomPositionAnim]);
+
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert('Error', 'Please enter both username and password');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await axios.post(`${BASE_URL}/api/auth/login`, {
+        username,
+        password,
+      });
+
+      if (response.data.success) {
+        setLoading(false);
+        navigation.replace('EmployeeList');
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', 'Invalid credentials');
       setPassword('');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        {/* <View style={styles.glowCircle} /> */}
-        <View
-          //   source={require('../../assets/illustrationbg.svg')}
-          style={styles.illustrationbg}
-        />
-        <Image
-          source={require('../../assets/doctor-illustration.png')}
-          style={styles.illustration}
-          resizeMode="contain"
-        />
-      </View>
-
-      <View style={styles.form}>
-        <Text style={styles.title}>Welcome Back!</Text>
-        <Text style={styles.subtitle}>
-          Login to access your Salary Slip App
-        </Text>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            placeholderTextColor={colors.text.secondary}
+      <Animated.View
+        style={[
+          styles.header,
+          {
+            height: headerHeightAnim,
+          },
+        ]}>
+        <View style={styles.illustrationWrapper}>
+          <Animated.View
+            style={[
+              styles.illustrationbg,
+              {
+                opacity: illustrationOpacityAnim,
+              },
+            ]}
+          />
+          <Animated.Image
+            source={require('../../assets/doctor-illustration.png')}
+            style={[
+              styles.illustration,
+              {
+                opacity: illustrationOpacityAnim,
+              },
+            ]}
+            resizeMode="contain"
           />
         </View>
+      </Animated.View>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor={colors.text.secondary}
-          />
-        </View>
+      <Animated.View
+        style={[styles.formSection, {paddingBottom: bottomPaddingAnim}]}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.formContent}
+          showsVerticalScrollIndicator={false}
+          bounces={false}>
+          <View style={styles.formInner}>
+            <View>
+              <Text style={styles.title}>Welcome Back!</Text>
+              <Text style={styles.subtitle}>
+                Login to access your Salary Slip App
+              </Text>
 
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={handleLogin}
-          activeOpacity={0.7}>
-          <Text style={styles.buttonText}>LOGIN</Text>
-        </TouchableOpacity>
-      </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Username"
+                  value={username}
+                  onChangeText={setUsername}
+                  autoCapitalize="none"
+                  placeholderTextColor={colors.text.secondary}
+                  editable={!loading}
+                />
+              </View>
+
+              <View style={[styles.inputContainer, styles.lastInputSpacing]}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  placeholderTextColor={colors.text.secondary}
+                  editable={!loading}
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+              onPress={handleLogin}
+              activeOpacity={0.8}
+              disabled={loading}>
+              <Text style={styles.buttonText}>
+                {loading ? 'LOGGING IN...' : 'LOGIN'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -86,104 +199,107 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   header: {
-    alignItems: 'center',
+    width: '100%',
     justifyContent: 'center',
-    height: '50%',
+    alignItems: 'center',
+    overflow: 'hidden',
+    backgroundColor: colors.primary,
+  },
+  illustrationWrapper: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   illustrationbg: {
     position: 'absolute',
-    left: '22%',
-    backgroundColor: '#fff',
-    opacity: 0.4,
-    height: width * 0.6,
-    width: width * 0.6,
-    borderRadius: '50%',
-    filter: 'blur(40px)',
-    backdropFilter: 'blur(40px)',
-    // position: 'absolute',
-    // width: width * 0.8,
-    // height: width * 0.8,
-    // borderRadius: width * 0.4, // Makes it a perfect circle (half of width/height)
-    // backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    // top: 0,
-    // left: 0,
-    // height: 100,
-    // width: 100,
-    // transform: [{translateY: -(width * 0.4)}],
-    // shadowColor: '#000',
-    // shadowOffset: {width: 0, height: 4},
-    // shadowOpacity: 0.1,
-    // shadowRadius: 20,
-    // elevation: 10,
-    // filter: 'blur(1px)',
-    // backdropFilter: 'blur(1px)',
+    width: width * 0.5,
+    height: width * 0.5,
+    borderRadius: width * 0.25,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   illustration: {
-    width: width * 0.9,
-    height: width * 0.9,
-    maxHeight: 400,
+    width: Math.min(width, 300),
+    height: Math.min(width, 300),
     zIndex: 1,
   },
-  form: {
+  formSection: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: colors.surface,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
-    padding: spacing.xl,
-    flex: 1,
-    elevation: 24,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: -3},
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
+    maxHeight: height * 0.65,
+  },
+  formContent: {
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  formInner: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: colors.text.primary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: spacing.xl,
+    lineHeight: 22,
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: spacing.sm,
+  },
+  lastInputSpacing: {
+    marginBottom: 0,
   },
   input: {
     backgroundColor: colors.background,
-    borderRadius: 16,
-    padding: Platform.OS === 'ios' ? 16 : 12,
+    borderRadius: 14,
+    paddingHorizontal: spacing.md,
+    paddingVertical: Platform.OS === 'ios' ? spacing.md : spacing.sm,
     fontSize: 16,
     color: colors.text.primary,
-    height: 56,
+    height: 54,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
   },
   loginButton: {
-    height: 56,
+    height: 54,
     backgroundColor: colors.primary,
-    borderRadius: 28,
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
     shadowColor: colors.primary,
     shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  loginButtonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: colors.text.light,
     fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 1,
+    fontWeight: '700',
+    letterSpacing: 0.8,
   },
 });
 

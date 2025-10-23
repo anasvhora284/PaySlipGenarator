@@ -19,6 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/employees", require("./routes/employeeRoutes"));
 app.use("/api/salaryslips", require("./routes/salarySlipRoutes"));
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/form16", require("./routes/form16Routes"));
 
 // Basic route
 app.get("/", (req, res) => {

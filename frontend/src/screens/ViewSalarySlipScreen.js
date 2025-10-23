@@ -14,7 +14,7 @@ import {
   Modal,
   TouchableOpacity,
 } from 'react-native';
-import {Text, Button, ActivityIndicator, Card, Title} from 'react-native-paper';
+import {Text, Button as PaperButton, ActivityIndicator, Card, Title} from 'react-native-paper';
 import axios from 'axios';
 import {BASE_URL} from '../utils/api';
 import moment from 'moment';
@@ -25,9 +25,7 @@ import FileViewer from 'react-native-file-viewer';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import SalarySlipForm from '../components/SalarySlipForm';
 import ScreenHeader from '../components/common/ScreenHeader';
-import zIndex from '@mui/material/styles/zIndex';
-import TouchID from 'react-native-touch-id';
-import * as Keychain from 'react-native-keychain';
+import {Button} from '../components/common';
 import ReactNativeBiometrics, {BiometryTypes} from 'react-native-biometrics';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -146,6 +144,8 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [authType, setAuthType] = useState(null);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [downloadedFilePath, setDownloadedFilePath] = useState('');
   const rnBiometrics = new ReactNativeBiometrics();
 
   useEffect(() => {
@@ -313,12 +313,18 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
   };
 
   const handlePasswordSubmit = async () => {
-    if (password === 'GenSSP@123') {
-      setPasswordModalVisible(false);
-      setPassword('');
-      await generateAndSavePDF();
-    } else {
-      Alert.alert('Error', 'Incorrect password');
+    try {
+      const response = await axios.post(`${BASE_URL}/api/salaryslips/verify-password`, {
+        password,
+      });
+      
+      if (response.data.success) {
+        setPasswordModalVisible(false);
+        setPassword('');
+        await generateAndSavePDF();
+      }
+    } catch (error) {
+      Alert.alert('Error', error.response?.data?.message || 'Incorrect password');
     }
   };
 
@@ -326,10 +332,22 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
     try {
       setGeneratingPDF(true);
 
-      // Use app's private directory
-      const appDir = ReactNativeBlobUtil.fs.dirs.DocumentDir;
+      const {dirs} = ReactNativeBlobUtil.fs;
+      const appBaseDir = `${dirs.DownloadDir}/Pay Slip Pro`;
+      const salarySlipDir = `${appBaseDir}/Salary Slips`;
+
+      const baseDirExists = await ReactNativeBlobUtil.fs.exists(appBaseDir);
+      if (!baseDirExists) {
+        await ReactNativeBlobUtil.fs.mkdir(appBaseDir);
+      }
+
+      const salarySlipDirExists = await ReactNativeBlobUtil.fs.exists(salarySlipDir);
+      if (!salarySlipDirExists) {
+        await ReactNativeBlobUtil.fs.mkdir(salarySlipDir);
+      }
+
       const fileName = `SalarySlip_${salarySlip.employee.name}_${salarySlip.month}_${salarySlip.year}.pdf`;
-      const filePath = `${appDir}/${fileName}`;
+      const filePath = `${salarySlipDir}/${fileName}`;
 
       // Generate and save PDF
       const pdfContent = await generateSalarySlipPDF(
@@ -341,38 +359,8 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
 
       console.log('PDF saved successfully at:', filePath);
       setGeneratingPDF(false);
-
-      Alert.alert('Success', 'PDF generated successfully', [
-        {
-          text: 'View',
-          onPress: async () => {
-            try {
-              await ReactNativeBlobUtil.android.actionViewIntent(
-                filePath,
-                'application/pdf',
-              );
-            } catch (error) {
-              console.error('Error opening PDF:', error);
-              Alert.alert(
-                'No PDF Viewer',
-                'Would you like to share the PDF instead?',
-                [
-                  {
-                    text: 'Share',
-                    onPress: () => sharePDF(filePath),
-                  },
-                  {text: 'Cancel'},
-                ],
-              );
-            }
-          },
-        },
-        {
-          text: 'Share',
-          onPress: () => sharePDF(filePath),
-        },
-        {text: 'OK'},
-      ]);
+      setDownloadedFilePath(filePath);
+      setSuccessModalVisible(true);
     } catch (error) {
       setGeneratingPDF(false);
       console.error('PDF generation error:', error);
@@ -417,8 +405,8 @@ NET SALARY: ₹${salarySlip.netSalary}
       setLoading(true);
       const processedData = {
         ...formData,
-        month: parseInt(formData.month),
-        year: parseInt(formData.year),
+        month: parseInt(formData.month, 10),
+        year: parseInt(formData.year, 10),
         earnings: Object.entries(formData.earnings).reduce(
           (acc, [key, value]) => ({
             ...acc,
@@ -489,6 +477,27 @@ NET SALARY: ₹${salarySlip.netSalary}
       console.log('Biometric check error:', error);
       setAuthType('password');
     }
+  };
+
+  const handleViewPDF = async () => {
+    try {
+      setSuccessModalVisible(false);
+      await ReactNativeBlobUtil.android.actionViewIntent(
+        downloadedFilePath,
+        'application/pdf',
+      );
+    } catch (error) {
+      console.error('Error opening PDF:', error);
+      Alert.alert(
+        'No PDF Viewer',
+        'No PDF viewer app found. Please install a PDF reader app.',
+      );
+    }
+  };
+
+  const handleSharePDF = () => {
+    setSuccessModalVisible(false);
+    sharePDF(downloadedFilePath);
   };
 
   if (loading) {
@@ -581,25 +590,26 @@ NET SALARY: ₹${salarySlip.netSalary}
               mode="contained"
               onPress={handleShare}
               style={[styles.button, {backgroundColor: colors.primary}]}
-              icon="share"
-              disabled={generatingPDF}>
-              Share as Text
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleDownloadPDF}
-              style={[styles.button, {backgroundColor: colors.primary}]}
-              icon="file-pdf-box"
-              loading={generatingPDF}
-              disabled={generatingPDF}>
-              {generatingPDF ? 'Generating PDF...' : 'Download PDF'}
-            </Button>
+              icon="content-copy"
+              disabled={generatingPDF}
+              title="Copy"
+            />
             <Button
               mode="contained"
               onPress={handleDelete}
               style={[styles.button, {backgroundColor: colors.error}]}
-              icon="delete">
-              Delete
+              icon="delete"
+              title="Delete"
+            />
+            <Button
+              mode="contained"
+              onPress={handleDownloadPDF}
+              style={[styles.button, {backgroundColor: colors.primary}]}
+              icon="download"
+              title="Download PDF"
+              loading={generatingPDF}
+              disabled={generatingPDF}>
+              {generatingPDF ? 'Generating PDF...' : 'Download PDF'}
             </Button>
           </View>
         </View>
@@ -614,6 +624,53 @@ NET SALARY: ₹${salarySlip.netSalary}
         authType={authType}
         handleDownloadPDF={handleDownloadPDF}
       />
+
+      {/* Success Modal */}
+      <Modal
+        visible={successModalVisible}
+        transparent={true}
+        animationType="fade">
+        <View style={styles.successModalOverlay}>
+          <View style={styles.successModal}>
+            <View style={styles.successIconContainer}>
+              <Icon name="check-circle" size={64} color={colors.success} />
+            </View>
+
+            <Text style={styles.successTitle}>Download Complete!</Text>
+            <Text style={styles.successMessage}>
+              Salary Slip has been successfully saved to your device
+            </Text>
+            <Text style={styles.successPath}>
+              Location: Downloads/Pay Slip Pro/Salary Slips/
+            </Text>
+
+            <View style={styles.successModalButtons}>
+              <Button
+                title="View"
+                icon="visibility"
+                variant="primary"
+                onPress={handleViewPDF}
+                style={styles.successButton}
+              />
+
+              <Button
+                title="Share"
+                icon="share"
+                variant="primary"
+                onPress={handleSharePDF}
+                style={styles.successButton}
+              />
+
+              <Button
+                title="OK"
+                variant="secondary"
+                onPress={() => setSuccessModalVisible(false)}
+                style={styles.successButton}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -649,7 +706,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.primary,
     fontWeight: '600',
-    // marginBottom: spacing.sm,
   },
   editToggleContainer: {
     position: 'absolute',
@@ -678,6 +734,8 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: spacing.xs,
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   updateButton: {
     marginHorizontal: spacing.md,
@@ -751,6 +809,55 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
+  },
+  successModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successModal: {
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: spacing.xl,
+    width: '85%',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+  },
+  successIconContainer: {
+    marginBottom: spacing.md,
+  },
+  successTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  successMessage: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  successPath: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: spacing.lg,
+  },
+  successModalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: spacing.sm,
+  },
+  successButton: {
+    flex: 1,
   },
 });
 

@@ -19,7 +19,7 @@ const generateSalarySlipHTML = (salarySlip, employeeName, employeeId) => {
             text-align: center;
             margin-bottom: 40px;
             padding-bottom: 20px;
-            border-bottom: 2px solid #2196F3;
+            border-bottom: 2px solid #2D6A4F;
           }
           
           .company-logo {
@@ -31,7 +31,7 @@ const generateSalarySlipHTML = (salarySlip, employeeName, employeeId) => {
           .company-name {
             font-size: 28px;
             font-weight: bold;
-            color: #1976D2;
+            color: #2D6A4F;
             margin-bottom: 10px;
           }
           
@@ -71,7 +71,7 @@ const generateSalarySlipHTML = (salarySlip, employeeName, employeeId) => {
           }
           
           .salary-table th {
-            background-color: #2196F3;
+            background-color: #2D6A4F;
             color: white;
             padding: 15px;
             text-align: left;
@@ -87,27 +87,28 @@ const generateSalarySlipHTML = (salarySlip, employeeName, employeeId) => {
           }
           
           .total-row {
-            background-color: #EEF2F6 !important;
+            color: #fff;
+            background-color: #2D6A4F !important;
             font-weight: bold;
           }
           
           .net-salary-section {
             margin-top: 40px;
             padding: 20px;
-            background-color: #E3F2FD;
+            background-color: #2D6A4F;
             border-radius: 8px;
             text-align: right;
           }
           
           .net-salary-label {
             font-size: 20px;
-            color: #1976D2;
+            color: #fff;
             font-weight: bold;
           }
           
           .net-salary-amount {
             font-size: 24px;
-            color: #1976D2;
+            color: #fff;
             font-weight: bold;
             margin-left: 20px;
           }

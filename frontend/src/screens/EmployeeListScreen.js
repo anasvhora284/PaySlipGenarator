@@ -90,6 +90,22 @@ const EmployeeListScreen = ({navigation}) => {
     );
   };
 
+  // Upload Form 16
+  const handleUploadForm16 = (employeeId, employeeName) => {
+    navigation.navigate('Form16Upload', {
+      employeeId,
+      employeeName,
+    });
+  };
+
+  // Download Form 16
+  const handleDownloadForm16 = (employeeId, employeeName) => {
+    navigation.navigate('Form16Download', {
+      employeeId,
+      employeeName,
+    });
+  };
+
   // Render employee card
   const renderEmployee = ({item}) => {
     if (!item) return null;
@@ -147,27 +163,60 @@ const EmployeeListScreen = ({navigation}) => {
           </View>
 
           <View style={styles.actionButtons}>
-            <Button
-              title="View Details"
-              icon="visibility"
-              variant="secondary"
-              onPress={() =>
-                navigation.navigate('EmployeeDetails', {
-                  employeeId: item._id,
-                })
-              }
-            />
-            <Button
-              title="Generate Slip"
-              icon="description"
-              variant="primary"
-              onPress={() =>
-                navigation.navigate('GenerateSalarySlip', {
-                  employeeId: item._id,
-                  employeeName: item.name,
-                })
-              }
-            />
+            <View style={styles.buttonWrapper}>
+              <Button
+                title="View Details"
+                icon="visibility"
+                variant="secondary"
+                fullWidth
+                style={styles.alignedButton}
+                onPress={() =>
+                  navigation.navigate('EmployeeDetails', {
+                    employeeId: item._id,
+                  })
+                }
+              />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title="Generate Slip"
+                icon="description"
+                variant="primary"
+                fullWidth
+                style={styles.alignedButton}
+                onPress={() =>
+                  navigation.navigate('GenerateSalarySlip', {
+                    employeeId: item._id,
+                    employeeName: item.name,
+                  })
+                }
+              />
+            </View>
+          </View>
+
+          <View style={styles.form16Buttons}>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title={'Upload\nForm-16'}
+                icon="upload"
+                variant="secondary"
+                fullWidth
+                style={styles.alignedButton}
+                textStyle={styles.multilineButtonText}
+                onPress={() => handleUploadForm16(item._id, item.name)}
+              />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title={'Download\nForm-16'}
+                icon="download"
+                variant="primary"
+                fullWidth
+                style={styles.alignedButton}
+                textStyle={styles.multilineButtonText}
+                onPress={() => handleDownloadForm16(item._id, item.name)}
+              />
+            </View>
           </View>
         </Card.Content>
       </Card>
@@ -312,11 +361,29 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     marginTop: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     paddingTop: spacing.md,
+    gap: spacing.sm,
+  },
+  form16Buttons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+    gap: spacing.sm,
+  },
+  buttonWrapper: {
+    flex: 1,
+  },
+  alignedButton: {
+    justifyContent: 'flex-start',
+    paddingLeft: spacing.md,
+  },
+  multilineButtonText: {
+    textAlign: 'left',
+    lineHeight: 18,
   },
   fab: {
     position: 'absolute',

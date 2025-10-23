@@ -1,6 +1,5 @@
 import NetInfo from '@react-native-community/netinfo';
 import axios from 'axios';
-import {BASE_URL} from '../utils/api';
 
 class NetworkService {
   static instance = null;
@@ -21,8 +20,8 @@ class NetworkService {
       this.isConnected = state.isConnected;
 
       // Subscribe to network state updates
-      this.unsubscribe = NetInfo.addEventListener(state => {
-        this.isConnected = state.isConnected;
+      this.unsubscribe = NetInfo.addEventListener(networkState => {
+        this.isConnected = networkState.isConnected;
       });
 
       // Setup axios interceptors

@@ -39,9 +39,9 @@ const EmployeeListScreen = ({navigation}) => {
       } else {
         throw new Error('No data received from server');
       }
-    } catch (error) {
-      setError(error?.response?.data?.message || 'Failed to fetch employees');
-      console.error('Error fetching employees:', error);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to fetch employees');
+      console.error('Error fetching employees:', err);
     } finally {
       setLoading(false);
     }
@@ -80,9 +80,9 @@ const EmployeeListScreen = ({navigation}) => {
               await axios.delete(`${BASE_URL}/api/employees/${employeeId}`);
               fetchEmployees();
               Alert.alert('Success', 'Employee deleted successfully');
-            } catch (error) {
+            } catch (deleteError) {
               Alert.alert('Error', 'Failed to delete employee');
-              console.error(error);
+              console.error(deleteError);
             }
           },
         },
@@ -106,9 +106,19 @@ const EmployeeListScreen = ({navigation}) => {
     });
   };
 
+  // Render empty list component
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <Icon name="search" size={64} color={colors.text.secondary} />
+      <Text style={styles.emptyText}>No employees found</Text>
+    </View>
+  );
+
   // Render employee card
   const renderEmployee = ({item}) => {
-    if (!item) return null;
+    if (!item) {
+      return null;
+    }
 
     return (
       <Card style={styles.card}>
@@ -266,12 +276,7 @@ const EmployeeListScreen = ({navigation}) => {
         renderItem={renderEmployee}
         keyExtractor={item => item._id}
         contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Icon name="search" size={64} color={colors.text.secondary} />
-            <Text style={styles.emptyText}>No employees found</Text>
-          </View>
-        )}
+        ListEmptyComponent={renderEmptyList}
       />
 
       {renderFAB()}

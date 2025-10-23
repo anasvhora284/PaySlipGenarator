@@ -1,12 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {View, ScrollView, StyleSheet, Alert} from 'react-native';
 import {
-  TextInput,
   Button,
-  Title,
   Subheading,
   Card,
-  ActivityIndicator,
   Text,
 } from 'react-native-paper';
 import axios from 'axios';
@@ -101,7 +98,7 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {return;}
 
     try {
       setLoading(true);
@@ -113,14 +110,14 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
 
       const duplicateSlip = existingSlips.data.find(
         slip =>
-          slip.month === parseInt(formData.month) &&
-          slip.year === parseInt(formData.year),
+          slip.month === parseInt(formData.month, 10) &&
+          slip.year === parseInt(formData.year, 10),
       );
 
       if (duplicateSlip) {
         const monthYear = moment()
-          .month(parseInt(formData.month) - 1)
-          .year(parseInt(formData.year))
+          .month(parseInt(formData.month, 10) - 1)
+          .year(parseInt(formData.year, 10))
           .format('MMMM YYYY');
 
         Alert.alert('Error', `Salary slip already exists for ${monthYear}`);
@@ -132,8 +129,8 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
       const processedData = {
         ...formData,
         employee: employeeId,
-        month: parseInt(formData.month),
-        year: parseInt(formData.year),
+        month: parseInt(formData.month, 10),
+        year: parseInt(formData.year, 10),
         earnings: Object.entries(formData.earnings).reduce(
           (acc, [key, value]) => ({
             ...acc,
@@ -177,13 +174,13 @@ const GenerateSalarySlipScreen = ({route, navigation}) => {
 
   return (
     <ScrollView style={styles.container}>
-      <ScreenHeader title="Generate Salary Slip" style={{marginLeft: 0}} />
+      <ScreenHeader title="Generate Salary Slip" style={styles.header} />
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.employeeInfo}>
-            <Text style={{color: colors.primary}}>
+            <Text style={styles.employeeForText}>
               For{' '}
-              <Subheading style={{fontWeight: 'bold', color: colors.primary}}>
+              <Subheading style={styles.employeeNameText}>
                 {employeeName}
               </Subheading>
             </Text>
@@ -225,6 +222,16 @@ const styles = StyleSheet.create({
   },
   employeeInfo: {
     marginBottom: spacing.md,
+  },
+  header: {
+    marginLeft: 0,
+  },
+  employeeForText: {
+    color: colors.primary,
+  },
+  employeeNameText: {
+    fontWeight: 'bold',
+    color: colors.primary,
   },
 });
 

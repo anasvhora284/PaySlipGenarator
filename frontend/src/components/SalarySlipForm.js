@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, StyleSheet, Alert} from 'react-native';
 import {TextInput, Title, Text, Divider} from 'react-native-paper';
-import {colors, spacing, typography, layout} from '../styles/common';
+import {colors, spacing, typography} from '../styles/common';
 import PropTypes from 'prop-types';
 
 const SalarySlipForm = ({
@@ -14,7 +14,7 @@ const SalarySlipForm = ({
   netSalary,
 }) => {
   const validateMonth = text => {
-    const month = parseInt(text);
+    const month = parseInt(text, 10);
     if (month >= 1 && month <= 12) {
       setFormData({...formData, month: text});
     } else if (text === '') {
@@ -30,7 +30,7 @@ const SalarySlipForm = ({
 
     // Only validate if there's a complete 4-digit year
     if (length === 4) {
-      const year = parseInt(text);
+      const year = parseInt(text, 10);
       const currentYear = new Date().getFullYear();
       // Check if it's a valid year between 2000 and current year + 1
       if (year < 2000 || year > currentYear) {
@@ -57,7 +57,7 @@ const SalarySlipForm = ({
           maxLength={2}
           error={
             formData.month &&
-            (parseInt(formData.month) < 1 || parseInt(formData.month) > 12)
+            (parseInt(formData.month, 10) < 1 || parseInt(formData.month, 10) > 12)
           }
           theme={{
             colors: {
@@ -78,8 +78,8 @@ const SalarySlipForm = ({
           maxLength={4}
           error={
             formData.year &&
-            (parseInt(formData.year) < 2000 ||
-              parseInt(formData.year) > new Date().getFullYear() + 1)
+            (parseInt(formData.year, 10) < 2000 ||
+              parseInt(formData.year, 10) > new Date().getFullYear() + 1)
           }
           theme={{
             colors: {

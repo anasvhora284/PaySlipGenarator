@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {Text} from 'react-native-paper';
-import {colors, spacing} from '../../styles/common';
+import {colors} from '../../styles/common';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 
@@ -21,7 +21,7 @@ const ScreenHeader = ({title, style}) => {
         style={[
           styles.headerText,
           {style},
-          {marginLeft: navigation.canGoBack() ? 0 : 20},
+          navigation.canGoBack() ? styles.headerTextWithBack : styles.headerTextWithoutBack,
         ]}>
         {title}
       </Text>
@@ -47,6 +47,12 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textAlign: 'left',
     zIndex: 1,
+  },
+  headerTextWithBack: {
+    marginLeft: 0,
+  },
+  headerTextWithoutBack: {
+    marginLeft: 20,
   },
 });
 

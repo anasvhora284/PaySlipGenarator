@@ -4,6 +4,11 @@ import {Text, Button} from 'react-native-paper';
 import {MaterialIcons} from '@expo/vector-icons';
 import {colors, spacing, layout} from '../styles/common';
 
+// Icon component defined outside render
+const RefreshIcon = ({size, color}) => (
+  <MaterialIcons name="refresh" size={size} color={color} />
+);
+
 const ErrorScreen = ({message, onRetry}) => {
   return (
     <View style={styles.container}>
@@ -14,9 +19,7 @@ const ErrorScreen = ({message, onRetry}) => {
           mode="contained"
           onPress={onRetry}
           style={styles.button}
-          icon={({size, color}) => (
-            <MaterialIcons name="refresh" size={size} color={color} />
-          )}>
+          icon={RefreshIcon}>
           Retry
         </Button>
       )}

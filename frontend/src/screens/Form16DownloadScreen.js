@@ -77,18 +77,18 @@ const Form16DownloadScreen = ({route, navigation}) => {
 
     try {
       console.log('Download URL:', `${BASE_URL}/api/form16/download/${employeeId}?password=${password}&financialYear=${selectedYear}`);
-      
+
       // Create Pay Slip Pro directory structure
       const {dirs} = ReactNativeBlobUtil.fs;
       const appBaseDir = `${dirs.DownloadDir}/Pay Slip Pro`;
       const form16Dir = `${appBaseDir}/Form-16s`;
-      
+
       // Ensure directories exist
       const baseDirExists = await ReactNativeBlobUtil.fs.exists(appBaseDir);
       if (!baseDirExists) {
         await ReactNativeBlobUtil.fs.mkdir(appBaseDir);
       }
-      
+
       const form16DirExists = await ReactNativeBlobUtil.fs.exists(form16Dir);
       if (!form16DirExists) {
         await ReactNativeBlobUtil.fs.mkdir(form16Dir);
@@ -118,7 +118,7 @@ const Form16DownloadScreen = ({route, navigation}) => {
       console.error('Download error:', error);
       console.error('Error response:', error.response);
       console.error('Error data:', error.response?.data);
-      
+
       Alert.alert(
         'Error',
         error.response?.data?.message || error.message || 'Download failed',
@@ -132,17 +132,17 @@ const Form16DownloadScreen = ({route, navigation}) => {
   const handleViewFile = async () => {
     try {
       setSuccessModalVisible(false);
-      
+
       // Determine MIME type based on file extension
       const fileExtension = downloadedFilePath.split('.').pop().toLowerCase();
       let mimeType = 'application/pdf';
-      
+
       if (fileExtension === 'doc') {
         mimeType = 'application/msword';
       } else if (fileExtension === 'docx') {
         mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       }
-      
+
       // Use Android actionViewIntent with appropriate MIME type
       await ReactNativeBlobUtil.android.actionViewIntent(
         downloadedFilePath,
@@ -290,14 +290,14 @@ const Form16DownloadScreen = ({route, navigation}) => {
               <Icon name="lock" size={24} color={colors.primary} />
               <Text style={styles.passwordModalTitle}>Enter Password</Text>
             </View>
-            
+
             <Text style={styles.passwordModalSubtitle}>
               Password format: First 4 letters of name (CAPS) + Last 4 digits of phone
             </Text>
             <Text style={styles.passwordHint}>
               Example: JOHN1234
             </Text>
-            
+
             <TextInput
               style={styles.passwordInput}
               placeholder="Password"
@@ -308,7 +308,7 @@ const Form16DownloadScreen = ({route, navigation}) => {
               autoFocus
               onSubmitEditing={handlePasswordSubmit}
             />
-            
+
             <View style={styles.passwordModalButtons}>
               <TouchableOpacity
                 style={[styles.passwordModalButton, styles.cancelButton]}
@@ -318,7 +318,7 @@ const Form16DownloadScreen = ({route, navigation}) => {
                 }}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.passwordModalButton, styles.submitButton]}
                 onPress={handlePasswordSubmit}>
@@ -339,7 +339,7 @@ const Form16DownloadScreen = ({route, navigation}) => {
             <View style={styles.successIconContainer}>
               <Icon name="check-circle" size={64} color={colors.success} />
             </View>
-            
+
             <Text style={styles.successTitle}>Download Complete!</Text>
             <Text style={styles.successMessage}>
               Form-16 has been successfully downloaded to your device
@@ -347,7 +347,7 @@ const Form16DownloadScreen = ({route, navigation}) => {
             <Text style={styles.successPath}>
               Location: Downloads/Pay Slip Pro/Form-16s/
             </Text>
-            
+
             <View style={styles.successModalButtons}>
               <Button
                 title="View"

@@ -33,11 +33,11 @@ const Form16UploadScreen = ({route, navigation}) => {
   const generateFinancialYears = () => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth(); // 0-11
-    
+
     // If month is Jan-Mar, current FY is (year-1)-(year)
     // If month is Apr-Dec, current FY is (year)-(year+1)
     const startYear = currentMonth < 3 ? currentYear - 1 : currentYear;
-    
+
     const years = [];
     // Last 2 years, current year, and next year (4 years total)
     for (let i = -2; i <= 1; i++) {
@@ -278,11 +278,11 @@ const Form16UploadScreen = ({route, navigation}) => {
               <Icon name="lock" size={24} color={colors.primary} />
               <Text style={styles.passwordModalTitle}>Enter Password</Text>
             </View>
-            
+
             <Text style={styles.passwordModalSubtitle}>
               Enter the Form-16 upload password
             </Text>
-            
+
             <TextInput
               style={styles.passwordInput}
               placeholder="Password"
@@ -293,7 +293,7 @@ const Form16UploadScreen = ({route, navigation}) => {
               autoFocus
               onSubmitEditing={handlePasswordSubmit}
             />
-            
+
             <View style={styles.passwordModalButtons}>
               <TouchableOpacity
                 style={[styles.passwordModalButton, styles.cancelButton]}
@@ -303,7 +303,7 @@ const Form16UploadScreen = ({route, navigation}) => {
                 }}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.passwordModalButton, styles.submitButton]}
                 onPress={handlePasswordSubmit}>
@@ -324,7 +324,7 @@ const Form16UploadScreen = ({route, navigation}) => {
             <Icon name="cloud-upload" size={48} color={colors.primary} />
             <Text style={styles.progressTitle}>Uploading Form-16</Text>
             <Text style={styles.progressSubtitle}>{selectedFile?.name}</Text>
-            
+
             <View style={styles.progressBarContainer}>
               <View
                 style={[
@@ -333,9 +333,9 @@ const Form16UploadScreen = ({route, navigation}) => {
                 ]}
               />
             </View>
-            
+
             <Text style={styles.progressPercentage}>{uploadProgress}%</Text>
-            
+
             {uploadProgress === 100 && (
               <View style={styles.successContainer}>
                 <Icon name="check-circle" size={24} color={colors.success} />

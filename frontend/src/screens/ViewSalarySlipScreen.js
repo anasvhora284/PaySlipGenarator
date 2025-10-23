@@ -7,21 +7,18 @@ import {
   Alert,
   Share,
   Platform,
-  PermissionsAndroid,
-  Linking,
   Switch,
   TextInput,
   Modal,
   TouchableOpacity,
 } from 'react-native';
-import {Text, Button as PaperButton, ActivityIndicator, Card, Title} from 'react-native-paper';
+import {Text, ActivityIndicator} from 'react-native-paper';
 import axios from 'axios';
 import {BASE_URL} from '../utils/api';
 import moment from 'moment';
 import SalarySlipView from '../components/SalarySlipView';
-import {spacing, layout, colors, typography} from '../styles/common';
+import {spacing, colors, typography} from '../styles/common';
 import {generateSalarySlipPDF} from '../utils/pdfGenerator';
-import FileViewer from 'react-native-file-viewer';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import SalarySlipForm from '../components/SalarySlipForm';
 import ScreenHeader from '../components/common/ScreenHeader';
@@ -206,18 +203,12 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
   };
 
   const requestStoragePermission = async () => {
-    if (Platform.OS === 'ios') return true;
+    if (Platform.OS === 'ios') {
+      return true;
+    }
 
     // For Android, we don't need storage permissions for private directory
     return true;
-  };
-
-  const openSettings = () => {
-    if (Platform.OS === 'ios') {
-      Linking.openSettings();
-    } else {
-      Linking.openSettings();
-    }
   };
 
   const sharePDF = async filePath => {
@@ -234,28 +225,10 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
     }
   };
 
-  const openPDF = async filePath => {
-    try {
-      // Use FileViewer directly
-      await FileViewer.open(filePath, {
-        showOpenWithDialog: true,
-        showAppsSuggestions: true,
-      });
-    } catch (error) {
-      console.error('Error opening PDF:', error);
-      // Fallback to sharing if can't open
-      Alert.alert('Cannot Open PDF', 'Would you like to share it instead?', [
-        {
-          text: 'Share',
-          onPress: () => sharePDF(filePath),
-        },
-        {text: 'Cancel'},
-      ]);
-    }
-  };
-
   const handleDownloadPDF = async () => {
-    if (!salarySlip) return;
+    if (!salarySlip) {
+      return;
+    }
 
     try {
       if (
@@ -284,40 +257,12 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
     }
   };
 
-  const passwordPrompt = async () => {
-    if (Platform.OS === 'ios') {
-      Alert.prompt(
-        'Enter Password',
-        'Please enter the password to proceed:',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'OK',
-            onPress: async password => {
-              if (password === 'GenSSP@123') {
-                await generateAndSavePDF();
-              } else {
-                Alert.alert('Error', 'Incorrect password');
-              }
-            },
-          },
-        ],
-        'secure-text',
-      );
-    } else {
-      setPasswordModalVisible(true);
-    }
-  };
-
   const handlePasswordSubmit = async () => {
     try {
       const response = await axios.post(`${BASE_URL}/api/salaryslips/verify-password`, {
         password,
       });
-      
+
       if (response.data.success) {
         setPasswordModalVisible(false);
         setPassword('');

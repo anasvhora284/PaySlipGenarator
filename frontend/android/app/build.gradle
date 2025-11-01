@@ -99,6 +99,7 @@ android {
             keyPassword 'Anas@2906'
         }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -109,12 +110,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     splits {
         abi {
             enable true
             reset()
             include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
-            universalApk false
+            universalApk true
         }
     }
 }
@@ -129,13 +131,5 @@ dependencies {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
-    }
-}
-afterEvaluate {
-    tasks.named("packageDebugResources").configure {
-        dependsOn(":react-native-community_netinfo:generateDebugResValues")
-    }
-    tasks.named("packageReleaseResources").configure {
-        dependsOn(":react-native-community_netinfo:generateReleaseResValues")
     }
 }

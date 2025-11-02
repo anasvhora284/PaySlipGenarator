@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel Editor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.3.0/dist/handsontable.full.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fff;
+      overflow: hidden;
+      height: 100vh;
+    }
+    #toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e0e0e0;
+      height: 56px;
+    }
+    #toolbar-left, #toolbar-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .toolbar-btn {
+      padding: 8px 16px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .toolbar-btn:active {
+      background: #1976D2;
+    }
+    .toolbar-btn.back {
+      background: #757575;
+    }
+    .toolbar-btn.back:active {
+      background: #616161;
+    }
+    #zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    #zoom-controls button {
+      padding: 4px 8px;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #zoom-controls button:active {
+      background: #bdbdbd;
+    }
+    #zoom-level {
+      min-width: 45px;
+      text-align: center;
+      font-weight: 500;
+    }
+    #spreadsheet-container {
+      height: calc(100vh - 56px);
+      overflow: hidden;
+    }
+    #spreadsheet {
+      height: 100%;
+      width: 100%;
+    }
+    .htCore {
+      font-size: 12px;
+    }
+    .htCell {
+      padding: 6px;
+    }
+    .htRowHeader {
+      background: #f0f0f0;
+      font-weight: 500;
+      text-align: center;
+    }
+    .htColHeader {
+      background: #f0f0f0;
+      font-weight: 600;
+      text-align: center;
+    }
+    .status-msg {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-in-out;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <div id="toolbar-left">
+      <button class="toolbar-btn back" onclick="goBack()">← Back</button>
+    </div>
+    <div id="toolbar-right">
+      <div id="zoom-controls">
+        <button onclick="zoomOut()">−</button>
+        <span id="zoom-level">100%</span>
+        <button onclick="zoomIn()">+</button>
+      </div>
+      <button class="toolbar-btn" onclick="sendData()">Send</button>
+    </div>
+  </div>
+
+  <div id="spreadsheet-container">
+    <div id="spreadsheet"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/handsontable@14.3.0/dist/handsontable.full.min.js"></script>
+  <script>
+    let hot = null;
+    let currentZoom = 1;
+
+    // Initialize Handsontable
+    function initSpreadsheet(data, merges) {
+      const container = document.getElementById('spreadsheet');
+      
+      const config = {
+        data: data,
+        colHeaders: true,
+        rowHeaders: true,
+        fixedRowsTop: 0,
+        fixedColumnsStart: 0,
+        width: '100%',
+        height: '100%',
+        stretchH: 'all',
+        autoColumnSize: false,
+        autoRowSize: false,
+        columnHeaderHeight: 30,
+        rowHeaderWidth: 50,
+        defaultColWidth: 100,
+        defaultRowHeight: 40,
+        minCols: 30,
+        minRows: 100,
+        outsideClickDeselects: false,
+        enterBeginsEditing: true,
+        licenseKey: 'non-commercial-and-evaluation',
+        cells: function(row, col) {
+          const cellMeta = {};
+          // Apply merge if this cell is part of one
+          if (merges && merges[`${row}-${col}`]) {
+            const merge = merges[`${row}-${col}`];
+            if (merge.isStart) {
+              cellMeta.colspan = merge.colSpan;
+              cellMeta.rowspan = merge.rowSpan;
+            } else {
+              cellMeta.className = 'htHidden';
+              cellMeta.readOnly = true;
+            }
+          }
+          return cellMeta;
+        },
+        afterChange: function(changes, source) {
+          if (source !== 'loadData' && source !== 'external') {
+            saveData();
+          }
+        }
+      };
+
+      // Apply merges if provided
+      if (merges && Object.keys(merges).length > 0) {
+        config.mergeCells = [];
+        const seen = new Set();
+        for (const key in merges) {
+          if (merges[key].isStart) {
+            const [r, c] = key.split('-').map(Number);
+            const m = merges[key];
+            config.mergeCells.push({
+              row: r,
+              col: c,
+              rowspan: m.rowSpan,
+              colspan: m.colSpan
+            });
+          }
+        }
+      }
+
+      hot = new Handsontable(container, config);
+      showStatus('Spreadsheet loaded');
+    }
+
+    // Zoom functions
+    function zoomIn() {
+      currentZoom = Math.min(currentZoom + 0.1, 2);
+      applyZoom();
+    }
+
+    function zoomOut() {
+      currentZoom = Math.max(currentZoom - 0.1, 0.5);
+      applyZoom();
+    }
+
+    function applyZoom() {
+      if (hot) {
+        document.getElementById('spreadsheet').style.transform = `scale(${currentZoom})`;
+        document.getElementById('spreadsheet').style.transformOrigin = 'top left';
+        document.getElementById('zoom-level').textContent = Math.round(currentZoom * 100) + '%';
+      }
+    }
+
+    // Communication with React Native
+    function sendData() {
+      if (!hot) return;
+      const data = hot.getData();
+      const csv = convertToCSV(data);
+      
+      // Send back to React Native
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'data',
+          data: data,
+          csv: csv
+        }));
+      }
+      showStatus('Data sent!');
+    }
+
+    function convertToCSV(data) {
+      return data.map(row => 
+        row.map(cell => {
+          const escaped = String(cell || '').replace(/"/g, '""');
+          return escaped.includes(',') || escaped.includes('\n') ? `"${escaped}"` : escaped;
+        }).join(',')
+      ).join('\n');
+    }
+
+    function goBack() {
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'back'
+        }));
+      }
+    }
+
+    function showStatus(msg) {
+      const div = document.createElement('div');
+      div.className = 'status-msg';
+      div.textContent = msg;
+      document.body.appendChild(div);
+      setTimeout(() => div.remove(), 2000);
+    }
+
+    // Listen for data from React Native
+    window.addEventListener('message', (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'init') {
+          initSpreadsheet(msg.data, msg.merges);
+        }
+      } catch (e) {
+        console.error('Error parsing message:', e);
+      }
+    });
+
+    // Signal ready
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'ready'
+      }));
+    }
+  </script>
+</body>
+</html>

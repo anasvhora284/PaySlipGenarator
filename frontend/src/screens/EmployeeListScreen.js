@@ -106,6 +106,14 @@ const EmployeeListScreen = ({navigation}) => {
     });
   };
 
+  // Generate Form 16
+  const handleGenerateForm16 = (employeeId, employeeName) => {
+    navigation.navigate('Form16Generate', {
+      employeeId,
+      employeeName,
+    });
+  };
+
   // Render empty list component
   const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
@@ -220,11 +228,24 @@ const EmployeeListScreen = ({navigation}) => {
               <Button
                 title={'Download\nForm-16'}
                 icon="download"
-                variant="primary"
+                variant="secondary"
                 fullWidth
                 style={styles.alignedButton}
                 textStyle={styles.multilineButtonText}
                 onPress={() => handleDownloadForm16(item._id, item.name)}
+              />
+            </View>
+          </View>
+          <View style={styles.form16Buttons}>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title={'Generate\nForm-16'}
+                icon="description"
+                variant="primary"
+                fullWidth
+                style={styles.alignedButton}
+                textStyle={styles.multilineButtonText}
+                onPress={() => handleGenerateForm16(item._id, item.name)}
               />
             </View>
           </View>

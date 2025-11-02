@@ -302,7 +302,6 @@ const ViewSalarySlipScreen = ({route, navigation}) => {
       );
       await ReactNativeBlobUtil.fs.writeFile(filePath, pdfContent, 'base64');
 
-      console.log('PDF saved successfully at:', filePath);
       setGeneratingPDF(false);
       setDownloadedFilePath(filePath);
       setSuccessModalVisible(true);
@@ -419,7 +418,6 @@ NET SALARY: ₹${salarySlip.netSalary}
         setAuthType('password');
       }
     } catch (error) {
-      console.log('Biometric check error:', error);
       setAuthType('password');
     }
   };

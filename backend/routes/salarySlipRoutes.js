@@ -7,6 +7,7 @@ const {
   createSalarySlip,
   updateSalarySlip,
   deleteSalarySlip,
+  convertCsvToHtml,
 } = require("../controllers/salarySlipController");
 
 // Base route: /api/salaryslips
@@ -41,6 +42,9 @@ router.post("/verify-password", (req, res) => {
     });
   }
 });
+
+// Convert CSV to HTML with smart colspan/rowspan
+router.post("/convert-csv", convertCsvToHtml);
 
 // Get single salary slip, Update salary slip and Delete salary slip
 router

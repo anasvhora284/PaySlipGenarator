@@ -10,6 +10,8 @@ import ViewSalarySlipScreen from '../screens/ViewSalarySlipScreen';
 import LoginScreen from '../screens/LoginScreen';
 import Form16UploadScreen from '../screens/Form16UploadScreen';
 import Form16DownloadScreen from '../screens/Form16DownloadScreen';
+import Form16GenerateScreen from '../screens/Form16GenerateScreen';
+import ExcelEditorScreen from '../screens/ExcelEditorScreen';
 import {colors} from '../styles/common';
 
 const Stack = createNativeStackNavigator();
@@ -97,6 +99,28 @@ const AppNavigator = () => {
           component={Form16DownloadScreen}
           options={{
             title: 'Download Form-16',
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="Form16Generate"
+          component={Form16GenerateScreen}
+          options={{
+            title: 'Generate Form-16',
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="ExcelEditor"
+          component={ExcelEditorScreen}
+          options={{
+            title: 'Edit Form-16',
             contentStyle: {
               backgroundColor: colors.background,
             },

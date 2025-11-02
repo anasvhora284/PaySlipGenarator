@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
-  TextInput,
 } from 'react-native';
 import {Text, Card, ActivityIndicator} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,15 +17,13 @@ import {Button} from '../components/common';
 import ScreenHeader from '../components/common/ScreenHeader';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 
-const Form16DownloadScreen = ({route, navigation}) => {
+const Form16GenerateScreen = ({route, navigation}) => {
   const {employeeId, employeeName} = route.params;
   const [selectedYear, setSelectedYear] = useState(null);
   const [loading, setLoading] = useState(false);
   const [availableYears, setAvailableYears] = useState([]);
   const [fetchingYears, setFetchingYears] = useState(true);
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-  const [password, setPassword] = useState('');
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [downloadedFilePath, setDownloadedFilePath] = useState('');
 
@@ -34,7 +31,7 @@ const Form16DownloadScreen = ({route, navigation}) => {
     try {
       setFetchingYears(true);
       const response = await axios.get(
-        `${BASE_URL}/api/form16/available-years/${employeeId}`,
+        `${BASE_URL}/api/form16/available-years-salary/${employeeId}`,
       );
       if (response.data.success) {
         setAvailableYears(response.data.years || []);
@@ -55,24 +52,16 @@ const Form16DownloadScreen = ({route, navigation}) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleDownload = () => {
+  const handleGenerate = () => {
     if (!selectedYear) {
       Alert.alert('Error', 'Please select a financial year');
       return;
     }
 
-    // Show password modal
-    setPassword('');
-    setPasswordModalVisible(true);
+    generateForm16();
   };
 
-  const handlePasswordSubmit = async () => {
-    if (!password) {
-      Alert.alert('Error', 'Password is required');
-      return;
-    }
-
-    setPasswordModalVisible(false);
+  const generateForm16 = async () => {
     setLoading(true);
 
     try {
@@ -80,7 +69,6 @@ const Form16DownloadScreen = ({route, navigation}) => {
       const appBaseDir = `${dirs.DownloadDir}/Pay Slip Pro`;
       const form16Dir = `${appBaseDir}/Form-16s`;
 
-      // Ensure directories exist
       const baseDirExists = await ReactNativeBlobUtil.fs.exists(appBaseDir);
       if (!baseDirExists) {
         await ReactNativeBlobUtil.fs.mkdir(appBaseDir);
@@ -91,7 +79,7 @@ const Form16DownloadScreen = ({route, navigation}) => {
         await ReactNativeBlobUtil.fs.mkdir(form16Dir);
       }
 
-      const filename = `Form16_${employeeName}_${selectedYear}.pdf`;
+      const filename = `Form16_${employeeName}_${selectedYear}.xlsx`;
       const path = `${form16Dir}/${filename}`;
 
       const response = await ReactNativeBlobUtil.config({
@@ -99,61 +87,39 @@ const Form16DownloadScreen = ({route, navigation}) => {
         path: path,
       }).fetch(
         'GET',
-        `${BASE_URL}/api/form16/download/${employeeId}?password=${password}&financialYear=${selectedYear}`,
+        `${BASE_URL}/api/form16/generate/${employeeId}?financialYear=${selectedYear}`,
       );
 
       if (response.info().status === 200) {
         setDownloadedFilePath(path);
         setSuccessModalVisible(true);
       } else {
-        Alert.alert('Error', 'Failed to download file');
+        Alert.alert('Error', 'Failed to generate Form-16');
       }
     } catch (error) {
-      console.error('Download error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error data:', error.response?.data);
-
+      console.error('Generate error:', error);
       Alert.alert(
         'Error',
-        error.response?.data?.message || error.message || 'Download failed',
+        error.response?.data?.message || error.message || 'Generation failed',
       );
     } finally {
       setLoading(false);
-      setPassword('');
     }
   };
 
-  const handleViewFile = async () => {
-    try {
-      setSuccessModalVisible(false);
-
-      // Determine MIME type based on file extension
-      const fileExtension = downloadedFilePath.split('.').pop().toLowerCase();
-      let mimeType = 'application/pdf';
-
-      if (fileExtension === 'doc') {
-        mimeType = 'application/msword';
-      } else if (fileExtension === 'docx') {
-        mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      }
-
-      // Use Android actionViewIntent with appropriate MIME type
-      await ReactNativeBlobUtil.android.actionViewIntent(
-        downloadedFilePath,
-        mimeType,
-      );
-    } catch (error) {
-      console.error('Error opening file:', error);
-      Alert.alert(
-        'Cannot Open File',
-        'No app found to open this file. Please install a suitable viewer app.',
-      );
-    }
+  const handleEditFile = () => {
+    setSuccessModalVisible(false);
+    navigation.navigate('ExcelEditor', {
+      filePath: downloadedFilePath,
+      employeeId: employeeId,
+      employeeName: employeeName,
+      financialYear: selectedYear,
+    });
   };
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Download Form-16" />
+      <ScreenHeader title="Generate Form-16" />
       <ScrollView style={styles.content}>
         <Card style={styles.card}>
           <Card.Content>
@@ -173,9 +139,13 @@ const Form16DownloadScreen = ({route, navigation}) => {
               </View>
             ) : availableYears.length === 0 ? (
               <View style={styles.emptyContainer}>
-                <Icon name="info-outline" size={48} color={colors.text.secondary} />
+                <Icon
+                  name="info-outline"
+                  size={48}
+                  color={colors.text.secondary}
+                />
                 <Text style={styles.emptyText}>
-                  No Form-16 files have been uploaded yet
+                  No salary slips found for any financial year
                 </Text>
               </View>
             ) : (
@@ -190,7 +160,11 @@ const Form16DownloadScreen = ({route, navigation}) => {
                     ]}>
                     {selectedYear || 'Select financial year...'}
                   </Text>
-                  <Icon name="arrow-drop-down" size={24} color={colors.primary} />
+                  <Icon
+                    name="arrow-drop-down"
+                    size={24}
+                    color={colors.primary}
+                  />
                 </TouchableOpacity>
 
                 <Modal
@@ -209,7 +183,11 @@ const Form16DownloadScreen = ({route, navigation}) => {
                         </Text>
                         <TouchableOpacity
                           onPress={() => setDropdownVisible(false)}>
-                          <Icon name="close" size={24} color={colors.text.primary} />
+                          <Icon
+                            name="close"
+                            size={24}
+                            color={colors.text.primary}
+                          />
                         </TouchableOpacity>
                       </View>
                       <FlatList
@@ -252,78 +230,26 @@ const Form16DownloadScreen = ({route, navigation}) => {
 
             {availableYears.length > 0 && (
               <Button
-                title="Download Form-16"
-                icon="cloud-download"
+                title="Generate Form-16"
+                icon="description"
                 variant="primary"
                 fullWidth
-                onPress={handleDownload}
+                onPress={handleGenerate}
                 disabled={loading || !selectedYear}
-                style={styles.downloadButton}
+                style={styles.generateButton}
               />
             )}
 
             {loading && (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={styles.loadingText}>Downloading...</Text>
+                <Text style={styles.loadingText}>Generating Form-16...</Text>
               </View>
             )}
           </Card.Content>
         </Card>
       </ScrollView>
 
-      {/* Password Input Modal */}
-      <Modal
-        visible={passwordModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setPasswordModalVisible(false)}>
-        <View style={styles.passwordModalOverlay}>
-          <View style={styles.passwordModal}>
-            <View style={styles.passwordModalHeader}>
-              <Icon name="lock" size={24} color={colors.primary} />
-              <Text style={styles.passwordModalTitle}>Enter Password</Text>
-            </View>
-
-            <Text style={styles.passwordModalSubtitle}>
-              Password format: First 4 letters of name (CAPS) + Last 4 digits of phone
-            </Text>
-            <Text style={styles.passwordHint}>
-              Example: JOHN1234
-            </Text>
-
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Password"
-              placeholderTextColor={colors.text.secondary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoFocus
-              onSubmitEditing={handlePasswordSubmit}
-            />
-
-            <View style={styles.passwordModalButtons}>
-              <TouchableOpacity
-                style={[styles.passwordModalButton, styles.cancelButton]}
-                onPress={() => {
-                  setPasswordModalVisible(false);
-                  setPassword('');
-                }}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.passwordModalButton, styles.submitButton]}
-                onPress={handlePasswordSubmit}>
-                <Text style={styles.submitButtonText}>Download</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Success Modal */}
       <Modal
         visible={successModalVisible}
         transparent={true}
@@ -334,9 +260,9 @@ const Form16DownloadScreen = ({route, navigation}) => {
               <Icon name="check-circle" size={64} color={colors.success} />
             </View>
 
-            <Text style={styles.successTitle}>Download Complete!</Text>
+            <Text style={styles.successTitle}>Generation Complete!</Text>
             <Text style={styles.successMessage}>
-              Form-16 has been successfully downloaded to your device
+              Form-16 has been successfully generated and downloaded
             </Text>
             <Text style={styles.successPath}>
               Location: Downloads/Pay Slip Pro/Form-16s/
@@ -344,10 +270,10 @@ const Form16DownloadScreen = ({route, navigation}) => {
 
             <View style={styles.successModalButtons}>
               <Button
-                title="View"
-                icon="visibility"
+                title="Edit in App"
+                icon="edit"
                 variant="primary"
-                onPress={handleViewFile}
+                onPress={handleEditFile}
                 style={styles.successButton}
               />
               <Button
@@ -467,7 +393,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-  downloadButton: {
+  generateButton: {
     marginTop: spacing.md,
   },
   loadingContainer: {
@@ -490,84 +416,6 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: spacing.sm,
     textAlign: 'center',
-  },
-  passwordModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  passwordModal: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: spacing.xl,
-    width: '85%',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-  },
-  passwordModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  passwordModalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginLeft: spacing.sm,
-  },
-  passwordModalSubtitle: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: spacing.xs,
-  },
-  passwordHint: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontStyle: 'italic',
-    marginBottom: spacing.md,
-  },
-  passwordInput: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: spacing.md,
-    fontSize: 16,
-    color: colors.text.primary,
-    backgroundColor: colors.background,
-    marginBottom: spacing.lg,
-  },
-  passwordModalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  passwordModalButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
-  },
-  submitButton: {
-    backgroundColor: colors.primary,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
   },
   successModalOverlay: {
     flex: 1,
@@ -620,4 +468,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Form16DownloadScreen;
+export default Form16GenerateScreen;

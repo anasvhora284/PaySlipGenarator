@@ -39,6 +39,34 @@ const employeeSchema = new mongoose.Schema(
       trim: true,
       match: [/^[0-9]{10}$/, "Please add a valid phone number"],
     },
+    pan: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      match: [/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Please add a valid PAN number"],
+    },
+    employerPAN: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      match: [/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Please add a valid PAN number"],
+    },
+    employerTAN: {
+      type: String,
+      trim: true,
+    },
+    authorizedPersonName: {
+      type: String,
+      trim: true,
+    },
+    authorizedPersonDesignation: {
+      type: String,
+      trim: true,
+    },
+    employerAddress: {
+      type: String,
+      trim: true,
+    },
     isActive: {
       type: Boolean,
       default: true,

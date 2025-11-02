@@ -1,5 +1,6 @@
 const SalarySlip = require("../models/SalarySlip");
 const { convertToWords } = require("../utils/numberToWords");
+const { csvToHtmlWithSmartSpan } = require("../utils/csvToHtmlConverter");
 
 // Get all salary slips
 exports.getSalarySlips = async (req, res) => {
@@ -163,5 +164,30 @@ exports.deleteSalarySlip = async (req, res) => {
     res.status(200).json({ message: "Salary slip deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Convert CSV to HTML with smart colspan/rowspan
+exports.convertCsvToHtml = async (req, res) => {
+  try {
+    const { csvContent } = req.body;
+
+    if (!csvContent) {
+      return res.status(400).json({ message: "CSV content is required" });
+    }
+
+    // Convert CSV to HTML using JavaScript converter
+    const htmlOutput = csvToHtmlWithSmartSpan(csvContent);
+
+    res.status(200).json({
+      success: true,
+      html: htmlOutput,
+    });
+  } catch (error) {
+    console.error("CSV conversion error:", error);
+    res.status(500).json({
+      message: "Failed to convert CSV to HTML",
+      error: error.message,
+    });
   }
 };

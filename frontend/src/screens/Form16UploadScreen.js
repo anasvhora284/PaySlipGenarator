@@ -69,7 +69,6 @@ const Form16UploadScreen = ({route, navigation}) => {
   };
 
   const handleUpload = () => {
-    console.log('Uploading Form-16 for:', {employeeId, selectedYear, selectedFile});
     if (!selectedYear) {
       Alert.alert('Error', 'Please select a financial year');
       return;
